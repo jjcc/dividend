@@ -5,8 +5,10 @@ import datetime
 
 class DividendInfo:
     def __init__(self, symbol, exchange=None, dividend_history=[], price_history=[], info={}):
-        self._symbol = symbol
         self._exchange = exchange
+        self._symbol = symbol
+        if exchange == 'TSE':
+            self._symbol = f"{symbol}.TO"
         self._dividend_history = dividend_history
         self._price_history = price_history
         self._info = info
@@ -18,6 +20,11 @@ class DividendInfo:
         etf = yf.Ticker(self._symbol)
         dh = etf.dividends
         df = dh.reset_index()
+        # check if the exchange is TSX
+        if self._exchange == 'TSE':
+            pass
+            #df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
+        #else:
         df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
         self._dividend_history = df
         self._price_history = etf.history("3mo")
@@ -44,21 +51,24 @@ def parse_etf_list( file_path ):
 
 def build_info_list(DividendInfo, etf_list):
     etf_info_list = []
+    etf_info_dict = {}
     for i , info in enumerate(etf_list):
         di = DividendInfo(info[0], info[1])
         di.retrieve_data()
         etf_info_list.append(di)
-        if i > 5:
-            break
-    return etf_info_list
+        k = di._symbol
+        etf_info_dict[k] = di
+        print(f"{i+1}/{len(etf_list)}: {k} processed.")
+    return etf_info_list, etf_info_dict
 
 def process_file(DividendInfo, parse_etf_list, build_info_list, infile, outfile):
     etf_list = parse_etf_list(infile)
 
-    etf_info_list = build_info_list(DividendInfo, etf_list)
+    etf_info_list, ei_dict = build_info_list(DividendInfo, etf_list)
     # Save the list of objects to a file
     with open(outfile, 'wb') as fp:
-        pickle.dump(etf_info_list, fp)
+        #pickle.dump(etf_info_list, fp)
+        pickle.dump(ei_dict, fp)
 
 if __name__ == '__main__':
     import os

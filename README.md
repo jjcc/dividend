@@ -1,2 +1,2 @@
 # dividend
-retrieve, save, analyse divided ETFs
+retrieve, save, analyse dividend ETFs

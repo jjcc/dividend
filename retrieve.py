@@ -27,7 +27,7 @@ class DividendInfo:
         #else:
         df['Date'] = pd.to_datetime(df['Date']).dt.strftime('%Y-%m-%d')
         self._dividend_history = df
-        self._price_history = etf.history("3mo")
+        self._price_history = etf.history("6mo")
         self._info = etf.info
     
     def __repr__(self):
